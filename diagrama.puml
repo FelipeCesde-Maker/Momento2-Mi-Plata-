@@ -1,0 +1,97 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+' ==========================================
+' ENUMERACIONES Y TIPOS DE DATOS
+' ==========================================
+enum RolUsuario {
+  ADMINISTRADOR
+  EMPLEADO
+}
+
+enum TipoMovimiento {
+  ENTRADA
+  SALIDA
+}
+
+' ==========================================
+' ENTIDADES DEL DOMINIO (MODELO DE DATOS)
+' ==========================================
+class Producto {
+  - id: String
+  - sku: String
+  - nombre: String
+  - categoria: String
+  - stock: Integer
+  - precio: Float
+  + getId(): String
+  + getSku(): String
+  + getNombre(): String
+  + getCategoria(): String
+  + getStock(): Integer
+  + getPrecio(): Float
+  + setStock(nuevoStock: Integer): Void
+}
+
+class Categoria {
+  - nombre: String
+  + getNombre(): String
+}
+
+class Movimiento {
+  - id: String
+  - fecha: String
+  - productoNombre: String
+  - tipo: TipoMovimiento
+  - cantidad: Integer
+  - motivo: String
+  - rolUsuario: RolUsuario
+  + getId(): String
+  + getFecha(): String
+  + getTipo(): TipoMovimiento
+  + getCantidad(): Integer
+}
+
+' ==========================================
+' CONTROLADORES / SERVICIOS
+' ==========================================
+class InventarioService {
+  - productos: List<Producto>
+  - categorias: List<Categoria>
+  - movimientos: List<Movimiento>
+  - rolActual: RolUsuario
+  + cambiarRol(nuevoRol: RolUsuario): Void
+  + guardarProducto(producto: Producto): Void
+  + editarProducto(id: String, datos: Producto): Void
+  + eliminarProducto(id: String): Boolean
+  + guardarCategoria(nombre: String): Boolean
+  + eliminarCategoria(index: Integer): Void
+  + registrarMovimiento(prodId: String, tipo: TipoMovimiento, cantidad: Integer, motivo: String): Boolean
+  + calcularEstadisticas(): Map
+}
+
+class LocalStorageAdapter {
+  + obtenerDatos(clave: String): String
+  + guardarDatos(clave: String, valor: String): Void
+}
+
+class UIController {
+  + renderizarTodo(): Void
+  + renderizarProductos(): Void
+  + renderizarCategorias(): Void
+  + renderizarOpcionesMovimiento(): Void
+  + renderizarHistorial(): Void
+  + aplicarPermisosRol(): Void
+}
+
+' ==========================================
+' RELACIONES ENTRE COMPONENTES
+' ==========================================
+InventarioService "1" o-- "*" Producto : gestiona
+InventarioService "1" o-- "*" Categoria : contiene
+InventarioService "1" o-- "*" Movimiento : registra
+Producto "1" -- "1" Categoria : pertenece a
+Movimiento "*" -- "1" Producto : opera sobre
+InventarioService ..> LocalStorageAdapter : persiste en
+UIController ..> InventarioService : invoca métodos
+@endhtml
